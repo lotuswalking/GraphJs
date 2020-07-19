@@ -4,7 +4,8 @@ const options =
     'user.read',
     'calendars.read',
     'Presence.Read',
-    'Presence.Read.All'
+    'Presence.Read.All',
+    'Chat.Read'
   ]);
 // Create an authentication provider for the implicit flow
 const authProvider =
@@ -57,6 +58,46 @@ async function getEmailDetail(id)
         .get();
         // console.log("77777777")
         updatePage(msalClient.getAccount(), Views.mailRead, mailRead);
+    }catch (error) {
+        updatePage(msalClient.getAccount(), Views.error, {
+          message: 'Error getting events',
+          debug: error
+        });
+}
+}
+//获取其他人的状态信息
+async function getPresenceByEmail(emailer)
+{
+    console.log()
+    try {
+        // console.log("###########")
+        var emailer = document.getElementById('mailAddr').value
+        let userProfile = await graphClient
+        .api('/users/'+emailer)
+        // .select('subject,from,receivedDateTime,id')
+        // .orderby('createdDateTime DESC')
+        .get();
+        var userId = userProfile.id;
+        // console.log(userId);
+        let userPresence = await graphClient
+        .api('/users/'+userId+'/presence')
+        .version('beta')
+        .get();
+        // console.log(userPresence);
+        showOtherPresence(emailer, userPresence);
+        //post a message to user
+        let chatMessage = {
+            "body": {
+                "content": "Hello, this is a message from Junyan's Bot!"
+            }
+        }
+        let res = await graphClient
+        .api('/chats/'+userId+'/messages')
+        .version('beta')
+        .post(chatMessage);
+        console.log(res);
+
+        
     }catch (error) {
         updatePage(msalClient.getAccount(), Views.error, {
           message: 'Error getting events',

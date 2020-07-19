@@ -17,6 +17,7 @@ const msalConfig = {
       'user.read',
       'calendars.read',
       'Presence.Read',
-      'Presence.Read.All'
+      'Presence.Read.All',
+      'Chat.Read'
     ]
   }

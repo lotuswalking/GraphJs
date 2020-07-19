@@ -3,7 +3,14 @@ const authenticatedNav = document.getElementById("authenticated-nav");
 const accountNav = document.getElementById("account-nav");
 const mainContainer = document.getElementById("main-container");
 
-const Views = { error: 1, home: 2, calendar: 3, mail: 4, presence: 5, mailRead: 6 };
+const Views = {
+  error: 1,
+  home: 2,
+  calendar: 3,
+  mail: 4,
+  presence: 5,
+  mailRead: 6,
+};
 // 自行封装的函数,创建bootstrap对象,动态显示class
 function createElement(type, className, text) {
   var element = document.createElement(type);
@@ -213,15 +220,49 @@ function updatePage(account, view, data) {
 updatePage(null, Views.home);
 // 显示在线信息
 function showPresence(presence) {
-//   console.log(presence);
+  //   console.log(presence);
   var div = document.createElement("div");
   div.appendChild(
     createElement("h1", null, "My Teams Status:" + presence.availability)
   );
   div.appendChild(createElement("h1", null, "activity:" + presence.activity));
   div.appendChild(createElement("h2", null, "ID: " + presence.id));
+  div.appendChild(
+    createElement(
+      "Label",
+      null,
+      "some others presence, Pls input their email address:"
+    )
+  );
+  var mailAddress = createElement(
+    "input",
+    "form-control email",
+    "xxx@lenovo.com"
+  );
+  mailAddress.setAttribute("Id", "mailAddr");
+  mailAddress.setAttribute("Value", "wanghui7@lenovo.com");
+  div.appendChild(mailAddress);
+  var btnGetPresence = createElement("button", null, "GetPresence");
+  btnGetPresence.setAttribute("onclick", "getPresenceByEmail()");
+  div.appendChild(btnGetPresence);
+  //其他人的窗口显示部分
+  displayDiv = createElement("div", "border", "status of xxx");
+  displayDiv.setAttribute("Id", "statusShow");
+  div.appendChild(displayDiv);
   mainContainer.innerHTML = "";
   mainContainer.appendChild(div);
+}
+function showOtherPresence(emailer, userPresence) {
+  try {
+    var status = document.getElementById("statusShow");
+    var div = document.createElement("div");
+    div.appendChild(createElement("h1",null ,`Presence for user: ${emailer}`));
+    div.appendChild(createElement("h1", null, `Presence status: ${userPresence.activity}`));
+    status.innerHTML = "";
+    status.appendChild(div);
+  } catch (error) {
+    console.log(error);
+  }
 }
 // 显示邮件
 function showEmail(emails) {
@@ -235,37 +276,37 @@ function showEmail(emails) {
     var thead = document.createElement("thead");
     table.appendChild(thead);
 
-    var headerrow = document.createElement("tr");
-    thead.appendChild(headerrow);
+    var headerRow = document.createElement("tr");
+    thead.appendChild(headerRow);
 
     var subject = createElement("th", null, "From");
     subject.setAttribute("scope", "col");
-    headerrow.appendChild(subject);
+    headerRow.appendChild(subject);
 
     var subject = createElement("th", null, "Subject");
     subject.setAttribute("scope", "col");
-    headerrow.appendChild(subject);
+    headerRow.appendChild(subject);
 
     var receivedDateTime = createElement("th", null, "receivedDateTime");
     receivedDateTime.setAttribute("scope", "col");
-    headerrow.appendChild(receivedDateTime);
+    headerRow.appendChild(receivedDateTime);
     var tbody = document.createElement("tbody");
     table.appendChild(tbody);
 
     for (const mail of emails.value) {
-      var mailrow = document.createElement("tr");
-      var mailrow = document.createElement("tr");
-      mailrow.setAttribute("key", mail.id);
-      mailrow.setAttribute('onclick','getEmailDetail("'+ mail.id +'")');
-      tbody.appendChild(mailrow);
+      var mailRow = document.createElement("tr");
+      var mailRow = document.createElement("tr");
+      mailRow.setAttribute("key", mail.id);
+      mailRow.setAttribute("onclick", 'getEmailDetail("' + mail.id + '")');
+      tbody.appendChild(mailRow);
 
-      var fromcell = createElement("td", null, mail.from.emailAddress.address);
-      mailrow.appendChild(fromcell);
+      var fromCell = createElement("td", null, mail.from.emailAddress.address);
+      mailRow.appendChild(fromCell);
       var subjectCell = createElement("td", null, mail.subject);
-    //   subjectCell.setAttribute('onclick','ShowEmailDetail(this)');
+      //   subjectCell.setAttribute('onclick','ShowEmailDetail(this)');
 
-      mailrow.appendChild(subjectCell);
-      var startcell = createElement(
+      mailRow.appendChild(subjectCell);
+      var startCell = createElement(
         "td",
         null,
         moment
@@ -273,7 +314,7 @@ function showEmail(emails) {
           .local()
           .format("M/D/YY h:mm A")
       );
-      mailrow.appendChild(startcell);
+      mailRow.appendChild(startCell);
     }
 
     mainContainer.innerHTML = "";
@@ -283,19 +324,26 @@ function showEmail(emails) {
   }
 }
 
-function ShowEmailDetail(emaildata)
-{
-    // console.log(emaildata);
-    var div = document.createElement("div");
-    div.appendChild(createElement("p", null,'Subject:' + emaildata.subject));
-    div.appendChild(createElement("p", null,'from:' + emaildata.from.emailAddress.name +' ' +emaildata.from.emailAddress.address));
-    var body = document.createElement('div');
-    body.innerHTML = emaildata.body.content;
-    div.appendChild(body);
-    mainContainer.innerHTML = '';
-    mainContainer.appendChild(div);
-    //  alert('item.subject'+src);
-
+function ShowEmailDetail(emaildata) {
+  // console.log(emaildata);
+  var div = document.createElement("div");
+  div.appendChild(createElement("p", null, "Subject:" + emaildata.subject));
+  div.appendChild(
+    createElement(
+      "p",
+      null,
+      "from:" +
+        emaildata.from.emailAddress.name +
+        " " +
+        emaildata.from.emailAddress.address
+    )
+  );
+  var body = document.createElement("div");
+  body.innerHTML = emaildata.body.content;
+  div.appendChild(body);
+  mainContainer.innerHTML = "";
+  mainContainer.appendChild(div);
+  //  alert('item.subject'+src);
 }
 
 // 显示日历
