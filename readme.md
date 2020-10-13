@@ -9,3 +9,6 @@ user need to sign in to get their email/calendar/presence status
 graph is use graph api to get data from MS graph Server
 
 ui.js is using for display any data
+
+使用web 服务器启动该网站.登录后可以在present里面查询其他人的在线状态
+
