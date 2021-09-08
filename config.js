@@ -1,7 +1,7 @@
 const msalConfig = {
     auth: {
       clientId: '80c1687b-440a-4dd6-811a-8c1d76be8129',
-      redirectUri: 'http://localhost'
+      redirectUri: 'https://lotuswalking.github.io/'
     },
     cache: {
       cacheLocation: "sessionStorage",
