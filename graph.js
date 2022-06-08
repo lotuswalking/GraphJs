@@ -116,10 +116,7 @@ function showEmail(emails) {
         var startCell = createElement(
           "td",
           null,
-          moment
-            .utc(mail.receivedDateTime.dateTime)
-            .local()
-            .format("M/D/YY h:mm A")
+          mail.receivedDateTime.dateTime
         );
         mailRow.appendChild(startCell);
       }
