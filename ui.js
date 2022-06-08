@@ -117,6 +117,7 @@ function showAccountNav(account) {
 }
 
 function showWelcomeMessage(account) {
+  console.log("showWelcomeMessage");
   // Create jumbotron
   var jumbotron = createElement("div", "jumbotron");
 
