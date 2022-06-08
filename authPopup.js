@@ -32,8 +32,9 @@ function handleResponse(response) {
      */
 
     if (response !== null) {
-        username = response.account.username;
-        showWelcomeMessage(response.account);
+        account = response.account;
+        showWelcomeMessage(account);
+        updatePage(account, Views.home)
     } else {
         selectAccount();
     }
