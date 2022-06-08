@@ -33,8 +33,7 @@ function handleResponse(response) {
 
     if (response !== null) {
         username = response.account.username;
-        console.log(username);
-        showWelcomeMessage(username);
+        showWelcomeMessage(response.account);
     } else {
         selectAccount();
     }
