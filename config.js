@@ -15,6 +15,7 @@ const msalConfig = {
       'openid',
       'profile',
       'user.read',
+      'mailboxsettings.read', 
       'calendars.read',
       'Presence.Read',
       'Presence.Read.All',
