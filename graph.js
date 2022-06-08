@@ -28,12 +28,123 @@ async function getEmails() {
         account: myMSALObj.getAccountByUsername(username),
         scopes: graphConfig.graphMailEndpoint.scopes,
         interactionType: msal.InteractionType.Popup
-    }).api('/me/messages').get()
+    }).api('/me/messages')
+    .orderby('createdDateTime DESC')
+    .get()
         .then((response) => {
             return updatePage(myMSALObj.getAccountByUsername(username),Views.mail,response);
         }).catch((error) => {
             console.log(error);
         });
+}
+
+function updatePage(account, view, data) {
+    //    如果没有账号登录或者View的入口参数为空
+    if (!view || !account) {
+      view = Views.home;
+    }
+    //   显示右上角登录小下拉条
+    showAccountNav(account);
+  
+    // 显示Email/Calendar/Presence等按钮
+    showAuthenticatedNav(account, view);
+  
+    switch (view) {
+      case Views.error:
+        showError(data);
+        break;
+      case Views.home:
+        showWelcomeMessage(account);
+        break;
+      case Views.calendar:
+        showCalendar(data);
+        break;
+      case Views.mail:
+        showEmail(data);
+        break;
+      case Views.presence:
+        showPresence(data);
+        break;
+      case Views.mailRead:
+        ShowEmailDetail(data);
+        break;
+    }
+  }
+
+// 显示邮件
+function showEmail(emails) {
+    try {
+      // console.log(emails);
+      var div = document.createElement("div");
+      div.appendChild(createElement("h1", null, "Email"));
+      var table = createElement("table", "table");
+      div.appendChild(table);
+  
+      var thead = document.createElement("thead");
+      table.appendChild(thead);
+  
+      var headerRow = document.createElement("tr");
+      thead.appendChild(headerRow);
+  
+      var subject = createElement("th", null, "From");
+      subject.setAttribute("scope", "col");
+      headerRow.appendChild(subject);
+  
+      var subject = createElement("th", null, "Subject");
+      subject.setAttribute("scope", "col");
+      headerRow.appendChild(subject);
+  
+      var receivedDateTime = createElement("th", null, "receivedDateTime");
+      receivedDateTime.setAttribute("scope", "col");
+      headerRow.appendChild(receivedDateTime);
+      var tbody = document.createElement("tbody");
+      table.appendChild(tbody);
+  
+      for (const mail of emails.value) {
+        var mailRow = document.createElement("tr");
+        var mailRow = document.createElement("tr");
+        mailRow.setAttribute("key", mail.id);
+        mailRow.setAttribute("onclick", 'getEmailDetail("' + mail.id + '")');
+        tbody.appendChild(mailRow);
+  
+        var fromCell = createElement("td", null, mail.from.emailAddress.address);
+        mailRow.appendChild(fromCell);
+        var subjectCell = createElement("td", null, mail.subject);
+        //   subjectCell.setAttribute('onclick','ShowEmailDetail(this)');
+  
+        mailRow.appendChild(subjectCell);
+        var startCell = createElement(
+          "td",
+          null,
+          moment
+            .utc(mail.receivedDateTime.dateTime)
+            .local()
+            .format("M/D/YY h:mm A")
+        );
+        mailRow.appendChild(startCell);
+      }
+  
+      mainContainer.innerHTML = "";
+      mainContainer.appendChild(div);
+    } catch (ex) {
+      console.log(ex);
+    }
+  }
+
+  async function getPresence() {
+    try {
+        let presence = await graphClient
+        .api('/me/presence')
+        .version('beta')
+        // .select('userPrincipalName, id')
+        // .select('availability')
+        .get();
+        updatePage(msalClient.getAccount(), Views.presence, presence)        
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
 }
 
 /**
