@@ -1,124 +1,110 @@
-const getGraphClient = (providerOptions) => {
+/**
+ * The code below demonstrates how you can use MSAL as a custom authentication provider for the Microsoft Graph JavaScript SDK. 
+ * You do NOT need to implement a custom provider. Microsoft Graph JavaScript SDK v3.0 (preview) offers AuthCodeMSALBrowserAuthenticationProvider 
+ * which handles token acquisition and renewal for you automatically. For more information on how to use it, visit: 
+ * https://github.com/microsoftgraph/msgraph-sdk-javascript/blob/dev/docs/AuthCodeMSALBrowserAuthenticationProvider.md
+ */
 
-  /**
-   * Pass the instance as authProvider in ClientOptions to instantiate the Client which will create and set the default middleware chain.
-   * For more information, visit: https://github.com/microsoftgraph/msgraph-sdk-javascript/blob/dev/docs/CreatingClientInstance.md
-   */
-  let clientOptions = {
-      authProvider: new MsalAuthenticationProvider(providerOptions),
-  };
+/**
+ * Returns a graph client object with the provided token acquisition options
+ * @param {Object} providerOptions: object containing user account, required scopes and interaction type
+ */
+ const getGraphClient = (providerOptions) => {
 
-  const graphClient = MicrosoftGraph.Client.initWithMiddleware(clientOptions);
+    /**
+     * Pass the instance as authProvider in ClientOptions to instantiate the Client which will create and set the default middleware chain.
+     * For more information, visit: https://github.com/microsoftgraph/msgraph-sdk-javascript/blob/dev/docs/CreatingClientInstance.md
+     */
+    let clientOptions = {
+        authProvider: new MsalAuthenticationProvider(providerOptions),
+    };
 
-  return graphClient;
+    const graphClient = MicrosoftGraph.Client.initWithMiddleware(clientOptions);
+
+    return graphClient;
 }
-
-// 异步操作,显示状态信息
-async function getPresence() {
-    try {
-        let presence = await graphClient
-        .api('/me/presence')
-        .version('beta')
-        // .select('userPrincipalName, id')
-        // .select('availability')
-        .get();
-        updatePage(msalClient.getAccount(), Views.presence, presence)        
-    }
-    catch(error)
-    {
-        console.log(error);
-    }
-}
-// 显示邮件
 async function getEmails() {
-    try {
-        // console.log("###########")
-        let mails = await graphClient
-        .api('/me/messages')
-        // .select('subject,from,receivedDateTime,id')
-        .orderby('createdDateTime DESC')
-        .get();
-        // console.log("77777777")
-        updatePage(msalClient.getAccount(), Views.mail, mails);
-    }catch (error) {
-        updatePage(msalClient.getAccount(), Views.error, {
-          message: 'Error getting events',
-          debug: error
+    getGraphClient({
+        account: myMSALObj.getAccountByUsername(username),
+        scopes: graphConfig.graphMailEndpoint.scopes,
+        interactionType: msal.InteractionType.Popup
+    }).api('/me/messages').get()
+        .then((response) => {
+            return updatePage(myMSALObj.getAccountByUsername(username),Views.mail,response);
+        }).catch((error) => {
+            console.log(error);
         });
 }
-}
-async function getEmailDetail(id)
-{
-    try {
-        // console.log("###########")
-        let mailRead = await graphClient
-        .api('/me/messages/'+id)
-        // .select('subject,from,receivedDateTime,id')
-        // .orderby('createdDateTime DESC')
-        .get();
-        // console.log("77777777")
-        updatePage(msalClient.getAccount(), Views.mailRead, mailRead);
-    }catch (error) {
-        updatePage(msalClient.getAccount(), Views.error, {
-          message: 'Error getting events',
-          debug: error
-        });
-}
-}
-//获取其他人的状态信息
-async function getPresenceByEmail(emailer)
-{
-    console.log()
-    try {
-        // console.log("###########")
-        var emailer = document.getElementById('mailAddr').value
-        let userProfile = await graphClient
-        .api('/users/'+emailer)
-        // .select('subject,from,receivedDateTime,id')
-        // .orderby('createdDateTime DESC')
-        .get();
-        var userId = userProfile.id;
-        // console.log(userId);
-        let userPresence = await graphClient
-        .api('/users/'+userId+'/presence')
-        .version('beta')
-        .get();
-        // console.log(userPresence);
-        showOtherPresence(emailer, userPresence);
-        //post a message to user
-        let chatMessage = {
-            "body": {
-                "content": "Hello, this is a message from Junyan's Bot!"
-            }
-        }
-        let res = await graphClient
-        .api('/chats/'+userId+'/messages')
-        .version('beta')
-        .post(chatMessage);
-        console.log(res);
 
-        
-    }catch (error) {
-        updatePage(msalClient.getAccount(), Views.error, {
-          message: 'Error getting events',
-          debug: error
-        });
-}
-}
-// 显示日历项
-async function getEvents() {
-    try {
-      let events = await graphClient
-          .api('/me/events')
-          .select('subject,organizer,start,end')
-          .orderby('createdDateTime DESC')
-          .get();
-  
-      updatePage(msalClient.getAccount(), Views.calendar, events);
-    } catch (error) {
-      updatePage(msalClient.getAccount(), Views.error, {
-        message: 'Error getting events',
-        debug: error
-      });
+/**
+ * This class implements the IAuthenticationProvider interface, which allows a custom authentication provider to be
+ * used with the Graph client. See: https://github.com/microsoftgraph/msgraph-sdk-javascript/blob/dev/src/IAuthenticationProvider.ts
+ */
+class MsalAuthenticationProvider {
+
+    account; // user account object to be used when attempting silent token acquisition
+    scopes; // array of scopes required for this resource endpoint
+    interactionType; // type of interaction to fallback to when silent token acquisition fails
+
+    constructor(providerOptions) {
+        this.account = providerOptions.account;
+        this.scopes = providerOptions.scopes;
+        this.interactionType = providerOptions.interactionType;
     }
-  }
+
+    /**
+     * This method will get called before every request to the ms graph server
+     * This should return a Promise that resolves to an accessToken (in case of success) or rejects with error (in case of failure)
+     * Basically this method will contain the implementation for getting and refreshing accessTokens
+     */
+    getAccessToken() {
+        return new Promise(async (resolve, reject) => {
+            let response;
+
+            try {
+                response = await myMSALObj.acquireTokenSilent({
+                    account: this.account,
+                    scopes: this.scopes
+                });
+
+                if (response.accessToken) {
+                    resolve(response.accessToken);
+                } else {
+                    reject(Error('Failed to acquire an access token'));
+                }
+            } catch (error) {
+                // in case if silent token acquisition fails, fallback to an interactive method
+                if (error instanceof msal.InteractionRequiredAuthError) {
+                    switch (this.interactionType) {
+                        case msal.InteractionType.Popup:
+
+                            response = await myMSALObj.acquireTokenPopup({
+                                scopes: this.scopes
+                            });
+
+                            if (response.accessToken) {
+                                resolve(response.accessToken);
+                            } else {
+                                reject(Error('Failed to acquire an access token'));
+                            }
+                            break;
+
+                        case msal.InteractionType.Redirect:
+                            /**
+                             * This will cause the app to leave the current page and redirect to the consent screen.
+                             * Once consent is provided, the app will return back to the current page and then the 
+                             * silent token acquisition will succeed. 
+                             */
+                            myMSALObj.acquireTokenRedirect({
+                                scopes: this.scopes
+                            });
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+        });
+    }
+}
