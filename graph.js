@@ -1,17 +1,17 @@
-// Create an options object with the same scopes from the login
-const options =
-  new MicrosoftGraph.MSALAuthenticationProviderOptions([
-    'user.read',
-    'calendars.read',
-    'Presence.Read',
-    'Presence.Read.All',
-    'Chat.Read'
-  ]);
-// Create an authentication provider for the implicit flow
-const authProvider =
-  new MicrosoftGraph.ImplicitMSALAuthenticationProvider(msalClient, options);
-// Initialize the Graph client
-const graphClient = MicrosoftGraph.Client.initWithMiddleware({authProvider});
+const getGraphClient = (providerOptions) => {
+
+  /**
+   * Pass the instance as authProvider in ClientOptions to instantiate the Client which will create and set the default middleware chain.
+   * For more information, visit: https://github.com/microsoftgraph/msgraph-sdk-javascript/blob/dev/docs/CreatingClientInstance.md
+   */
+  let clientOptions = {
+      authProvider: new MsalAuthenticationProvider(providerOptions),
+  };
+
+  const graphClient = MicrosoftGraph.Client.initWithMiddleware(clientOptions);
+
+  return graphClient;
+}
 
 // 异步操作,显示状态信息
 async function getPresence() {
