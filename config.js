@@ -3,6 +3,7 @@ const msalConfig = {
       clientId: '80c1687b-440a-4dd6-811a-8c1d76be8129',
       authority: "https://login.microsoftonline.com/5c7d0b28-bdf8-410c-aa93-4df372b16203",
       redirectUri: 'https://lotuswalking.github.io/GraphJs'
+      // redirectUri: 'http://localhost:5500'
     },
     cache: {
       cacheLocation: "localStorage",

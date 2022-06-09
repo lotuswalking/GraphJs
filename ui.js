@@ -117,20 +117,11 @@ function showAccountNav(account) {
 }
 
 function showWelcomeMessage(account) {
-  console.log("showWelcomeMessage");
-  // Create jumbotron
+    // Create jumbotron
   var jumbotron = createElement("div", "jumbotron");
 
   var heading = createElement("h1", null, "JavaScript SPA Graph Tutorial");
   jumbotron.appendChild(heading);
-
-  var lead = createElement(
-    "p",
-    "lead",
-    "This sample app shows how to use the Microsoft Graph API to access" +
-      " a user's data from JavaScript."
-  );
-  jumbotron.appendChild(lead);
 
   if (account) {
     // Welcome the user by name

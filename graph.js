@@ -32,6 +32,7 @@ async function getEmails() {
     .orderby('createdDateTime DESC')
     .get()
         .then((response) => {
+            console.log(response);
             return updatePage(myMSALObj.getAccountByUsername(username),Views.mail,response);
         }).catch((error) => {
             console.log(error);

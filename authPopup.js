@@ -19,8 +19,8 @@ function selectAccount() {
         // Add choose account code here
         console.warn("Multiple accounts detected.");
     } else if (currentAccounts.length === 1) {
-        username = currentAccounts[0].username;
-        showWelcomeMessage(username);
+        showWelcomeMessage(currentAccounts[0]);
+        updatePage(currentAccounts[0], Views.home)
     }
 }
 
@@ -67,32 +67,8 @@ function signOut() {
     myMSALObj.logout(logoutRequest);
 }
 
-function seeProfile() {
 
-    getGraphClient({
-        account: myMSALObj.getAccountByUsername(username),
-        scopes: graphConfig.graphMeEndpoint.scopes,
-        interactionType: msal.InteractionType.Popup
-    }).api('/me').get()
-        .then((response) => {
-            return updateUI(response, graphConfig.graphMeEndpoint.uri);
-        }).catch((error) => {
-            console.log(error);
-        });
-}
 
-function readMail() {
 
-    getGraphClient({
-        account: myMSALObj.getAccountByUsername(username),
-        scopes: graphConfig.graphMailEndpoint.scopes,
-        interactionType: msal.InteractionType.Popup
-    }).api('/me/messages').get()
-        .then((response) => {
-            return updateUI(response, graphConfig.graphMailEndpoint.uri);
-        }).catch((error) => {
-            console.log(error);
-        });
-}
 
 selectAccount();
