@@ -3,6 +3,7 @@
 const myMSALObj = new msal.PublicClientApplication(msalConfig);
 
 let username = "";
+let localAccount;
 
 function selectAccount() {
 
@@ -19,6 +20,8 @@ function selectAccount() {
         // Add choose account code here
         console.warn("Multiple accounts detected.");
     } else if (currentAccounts.length === 1) {
+        localAccount = currentAccounts[0]
+        username=currentAccounts[0].username;
         showWelcomeMessage(currentAccounts[0]);
         updatePage(currentAccounts[0], Views.home)
     }
@@ -32,9 +35,9 @@ function handleResponse(response) {
      */
 
     if (response !== null) {
-        account = response.account;
-        showWelcomeMessage(account);
-        updatePage(account, Views.home)
+        localAccount = response.account;
+        showWelcomeMessage(localAccount);
+        updatePage(localAccount, Views.home)
     } else {
         selectAccount();
     }

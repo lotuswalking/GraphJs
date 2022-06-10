@@ -235,7 +235,7 @@ function showPresence(presence) {
   mailAddress.setAttribute("Value", "wanghui7@lenovo.com");
   div.appendChild(mailAddress);
   var btnGetPresence = createElement("button", null, "GetPresence");
-  btnGetPresence.setAttribute("onclick", "getPresenceByEmail()");
+  btnGetPresence.setAttribute("onclick", "getPresenceByEmail(document.getElementById('mailAddr').value)");
   div.appendChild(btnGetPresence);
   //其他人的窗口显示部分
   displayDiv = createElement("div", "border", "status of xxx");
@@ -390,14 +390,14 @@ function showCalendar(events) {
     var startcell = createElement(
       "td",
       null,
-      moment.utc(event.start.dateTime).local().format("M/D/YY h:mm A")
+      event.start.dateTime
     );
     eventrow.appendChild(startcell);
 
     var endcell = createElement(
       "td",
       null,
-      moment.utc(event.end.dateTime).local().format("M/D/YY h:mm A")
+     event.end.dateTime
     );
     eventrow.appendChild(endcell);
   }
